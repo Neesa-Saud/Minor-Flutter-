@@ -396,6 +396,56 @@ class _NotesListScreenState extends State<NotesListScreen> {
     );
   }
 
+  Future<void> _confirmDelete(dynamic noteId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Note'),
+        content: const Text(
+            'Are you sure you want to delete this note? This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final authenticated = context.read<AuthService>().isAuthenticated;
+
+      if (authenticated) {
+        await ApiService.delete('/notes/$noteId');
+      } else {
+        await LocalNoteStorage.deleteNote(noteId);
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Note deleted'),
+          backgroundColor: Color(0xFF047857),
+        ),
+      );
+
+      _fetch();
+    } catch (error, stackTrace) {
+      if (!mounted) return;
+      AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -629,6 +679,35 @@ class _NotesListScreenState extends State<NotesListScreen> {
                                                     size: 16,
                                                     color: Color(0xFFB45309)),
                                               ),
+                                            PopupMenuButton<String>(
+                                              icon: const Icon(Icons.more_horiz,
+                                                  size: 18),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12),
+                                              ),
+                                              color: Colors.white,
+                                              elevation: 6,
+                                              onSelected: (value) async {
+                                                if (value == 'delete') {
+                                                  _confirmDelete(note['id']);
+                                                }
+                                              },
+                                              itemBuilder: (context) => [
+                                                const PopupMenuItem(
+                                                  value: 'delete',
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(Icons.delete_outline,
+                                                          color: Colors.red,
+                                                          size: 18),
+                                                      SizedBox(width: 10),
+                                                      Text('Delete'),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           ],
                                         ),
                                         const SizedBox(height: 8),
