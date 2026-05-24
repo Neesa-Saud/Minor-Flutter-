@@ -18,19 +18,24 @@ class LocalNoteStorage {
   }) async {
     final now = DateTime.now().toIso8601String();
     final id = -DateTime.now().microsecondsSinceEpoch;
-    await saveNote(id, {
-      'id': id,
-      'title': title.trim().isEmpty ? 'Untitled Note' : title.trim(),
-      'content': content,
-      'plain_text': htmlToPlain(content),
-      'color': color,
-      'is_pinned': false,
-      'is_archived': false,
-      'is_trashed': false,
-      'share_code': null,
-      'created_at': now,
-      'updated_at': now,
-    }, dirty: true, syncAction: 'create');
+    await saveNote(
+        id,
+        {
+          'id': id,
+          'title': title.trim().isEmpty ? 'Untitled Note' : title.trim(),
+          'content': content,
+          'plain_text': htmlToPlain(content),
+          'color': color,
+          'is_pinned': false,
+          'is_archived': false,
+          'is_trashed': false,
+          'share_code': null,
+          'created_at': now,
+          'updated_at': now,
+          '_local_origin': true,
+        },
+        dirty: true,
+        syncAction: 'create');
     return id;
   }
 
@@ -51,7 +56,8 @@ class LocalNoteStorage {
 
     if (dirty) {
       note['_dirty'] = true;
-      note['_sync_action'] = syncAction ?? (isLocalId(note['id']) ? 'create' : 'update');
+      note['_sync_action'] =
+          syncAction ?? (isLocalId(note['id']) ? 'create' : 'update');
     } else {
       note['_dirty'] = false;
       note.remove('_sync_action');
@@ -67,7 +73,8 @@ class LocalNoteStorage {
     return value == null ? null : Map<String, dynamic>.from(value);
   }
 
-  static Future<List<Map<String, dynamic>>> getAllNotes({String search = ''}) async {
+  static Future<List<Map<String, dynamic>>> getAllNotes(
+      {String search = ''}) async {
     final notes = await _read();
     final query = search.trim().toLowerCase();
     final values = notes.values
@@ -76,14 +83,19 @@ class LocalNoteStorage {
         .where((n) {
       if (query.isEmpty) return true;
       final title = (n['title'] ?? '').toString().toLowerCase();
-      final body = (n['plain_text'] ?? htmlToPlain(n['content'])).toString().toLowerCase();
+      final body = (n['plain_text'] ?? htmlToPlain(n['content']))
+          .toString()
+          .toLowerCase();
       return title.contains(query) || body.contains(query);
     }).toList();
 
     values.sort((a, b) {
-      final pinned = (b['is_pinned'] == true ? 1 : 0) - (a['is_pinned'] == true ? 1 : 0);
+      final pinned =
+          (b['is_pinned'] == true ? 1 : 0) - (a['is_pinned'] == true ? 1 : 0);
       if (pinned != 0) return pinned;
-      return (b['updated_at'] ?? '').toString().compareTo((a['updated_at'] ?? '').toString());
+      return (b['updated_at'] ?? '')
+          .toString()
+          .compareTo((a['updated_at'] ?? '').toString());
     });
     return values;
   }
@@ -95,13 +107,16 @@ class LocalNoteStorage {
     await prefs.setString(_key, jsonEncode(notes));
   }
 
-  static Future<void> replaceNoteId(dynamic oldId, Map<String, dynamic> cloudNote) async {
+  static Future<void> replaceNoteId(
+      dynamic oldId, Map<String, dynamic> cloudNote) async {
     final prefs = await SharedPreferences.getInstance();
     final notes = await _read();
+    final old = notes[oldId.toString()];
     notes.remove(oldId.toString());
     notes[cloudNote['id'].toString()] = {
       ...cloudNote,
       '_dirty': false,
+      '_local_origin': old?['_local_origin'] == true,
       'local_updated_at': DateTime.now().toIso8601String(),
     };
     await prefs.setString(_key, jsonEncode(notes));
@@ -121,9 +136,16 @@ class LocalNoteStorage {
 
     for (final n in cloudNotes) {
       final note = Map<String, dynamic>.from(n);
+      // Check if this cloud note was originally created locally
+      final existingKey = current.entries
+          .where((e) => e.value['id'].toString() == n['id'].toString())
+          .firstOrNull;
+      final wasLocalOrigin = existingKey?.value['_local_origin'] == true;
+
       merged[n['id'].toString()] = {
         ...note,
         '_dirty': false,
+        '_local_origin': wasLocalOrigin, // ← preserve the flag
         'local_updated_at': DateTime.now().toIso8601String(),
       };
     }
@@ -187,17 +209,20 @@ class LocalNoteStorage {
         .trim();
   }
 
-  static Future<void> _syncLocalFiles(dynamic noteId, Map<String, dynamic> note) async {
+  static Future<void> _syncLocalFiles(
+      dynamic noteId, Map<String, dynamic> note) async {
     final files = (note['files'] as List?) ?? const [];
     for (final item in files) {
       if (item is! Map || item['_local'] != true) continue;
       final path = item['path']?.toString();
       if (path == null || path.isEmpty) continue;
-      await ApiService.uploadFile('/files/upload', path, noteId: noteId.toString());
+      await ApiService.uploadFile('/files/upload', path,
+          noteId: noteId.toString());
     }
   }
 
-  static Future<bool> hasLocalChanges(dynamic noteId, String? cloudUpdatedAt) async {
+  static Future<bool> hasLocalChanges(
+      dynamic noteId, String? cloudUpdatedAt) async {
     final local = await getNote(noteId);
     if (local == null || local['_dirty'] != true) return false;
     if (cloudUpdatedAt == null) return true;
@@ -217,4 +242,24 @@ class LocalNoteStorage {
       return <String, dynamic>{};
     }
   }
-}
+  // ... hasLocalChanges, _read ...
+
+  static Future<void> clearCloudNotes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final notes = await _read();
+
+    notes.removeWhere((key, value) {
+      final note = Map<String, dynamic>.from(value);
+      // Keep if flagged as local origin
+      if (note['_local_origin'] == true) return false;
+      // Keep if still has a local (negative) ID
+      if (isLocalId(note['id'])) return false;
+      // Keep if dirty (unsynced changes)
+      if (note['_dirty'] == true) return false;
+      // Remove everything else (cloud notes)
+      return true;
+    });
+
+    await prefs.setString(_key, jsonEncode(notes));
+  }
+} // ← class closes here

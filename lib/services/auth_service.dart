@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api_service.dart';
 import 'error_handler.dart';
+import 'local_storage.dart';
 
 class AuthService extends ChangeNotifier {
   Map<String, dynamic>? _user;
@@ -41,23 +42,34 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> register({
-    required String name, required String username,
-    required String email, required String password,
+    required String name,
+    required String username,
+    required String email,
+    required String password,
     required String passwordConfirmation,
   }) async {
-    final res = await ApiService.post('/register', body: {
-      'name': name, 'username': username, 'email': email,
-      'password': password, 'password_confirmation': passwordConfirmation,
-    }, auth: false);
+    final res = await ApiService.post('/register',
+        body: {
+          'name': name,
+          'username': username,
+          'email': email,
+          'password': password,
+          'password_confirmation': passwordConfirmation,
+        },
+        auth: false);
 
     await _setAuth(res['user'], res['token']);
     return res;
   }
 
-  Future<Map<String, dynamic>> login({required String login, required String password}) async {
-    final res = await ApiService.post('/login', body: {
-      'login': login, 'password': password,
-    }, auth: false);
+  Future<Map<String, dynamic>> login(
+      {required String login, required String password}) async {
+    final res = await ApiService.post('/login',
+        body: {
+          'login': login,
+          'password': password,
+        },
+        auth: false);
 
     await _setAuth(res['user'], res['token']);
     return res;
@@ -69,6 +81,7 @@ class AuthService extends ChangeNotifier {
     } catch (error, stackTrace) {
       AppErrorHandler.report(error, stackTrace, source: 'Logout');
     }
+    await LocalNoteStorage.clearCloudNotes();
     await ApiService.removeToken();
     _user = null;
     _stats = null;
