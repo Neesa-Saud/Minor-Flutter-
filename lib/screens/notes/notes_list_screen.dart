@@ -17,12 +17,18 @@ class NotesListScreen extends StatefulWidget {
 
 class _NotesListScreenState extends State<NotesListScreen> {
   static const _palette = [
-    '#fff7d6',
-    '#ffffff',
-    '#dbeafe',
-    '#dcfce7',
-    '#fde2e2',
-    '#f3e8ff'
+    '#fff7d6', // yellow
+    '#ffffff', // white
+    '#dbeafe', // blue
+    '#dcfce7', // green
+    '#fde2e2', // red
+    '#f3e8ff', // purple
+    '#ffedd5', // orange
+    '#fce7f3', // pink
+    '#e0f2fe', // sky
+    '#f0fdf4', // mint
+    '#fef9c3', // light yellow
+    '#f1f5f9', // slate
   ];
 
   final _searchCtrl = TextEditingController();

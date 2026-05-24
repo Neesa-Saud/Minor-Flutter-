@@ -18,7 +18,38 @@ class NoteEditorScreen extends StatefulWidget {
 }
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
-  static const _palette = ['#fff7d6', '#ffffff', '#dbeafe', '#dcfce7', '#fde2e2', '#f3e8ff'];
+  static const _palette = [
+  '#fff7d6', // yellow
+  '#ffffff', // white
+  '#dbeafe', // blue
+  '#dcfce7', // green
+  '#fde2e2', // red
+  '#f3e8ff', // purple
+  '#ffedd5', // orange
+  '#fce7f3', // pink
+  '#e0f2fe', // sky
+  '#f0fdf4', // mint
+  '#fef9c3', // light yellow
+  '#f1f5f9', // slate
+  '#ffd700', // gold
+  '#ffe4b5', // moccasin
+  '#e6e6fa', // lavender
+  '#f0fff0', // honeydew
+  '#fff0f5', // lavender blush
+  '#f5fffa', // mint cream
+  '#fffacd', // lemon chiffon
+  '#e0ffff', // light cyan
+  '#ffe4e1', // misty rose
+  '#f5f5dc', // beige
+  '#faebd7', // antique white
+  '#e8f5e9', // light green
+  '#e3f2fd', // light blue
+  '#fce4ec', // light pink
+  '#ede7f6', // light purple
+  '#fff3e0', // light orange
+  '#e0f7fa', // light teal
+  '#f3e5f5', // light violet
+];
 
   final _titleC = TextEditingController();
   final _contentC = TextEditingController();
@@ -56,7 +87,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   int? get _serverNoteId {
-    final id = _activeNoteId is int ? _activeNoteId : int.tryParse(_activeNoteId?.toString() ?? '');
+    final id = _activeNoteId is int
+        ? _activeNoteId
+        : int.tryParse(_activeNoteId?.toString() ?? '');
     return id != null && id > 0 ? id : null;
   }
 
@@ -73,7 +106,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     try {
       final response = await ApiService.get('/notes/$_serverNoteId');
-      _applyNote(Map<String, dynamic>.from(response['data']), response['permission'] ?? 'owner');
+      _applyNote(Map<String, dynamic>.from(response['data']),
+          response['permission'] ?? 'owner');
       await LocalNoteStorage.saveNote(_activeNoteId, _note!);
       await _fetchCollaborators();
     } catch (error, stackTrace) {
@@ -83,7 +117,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           error,
           context: context,
           stackTrace: stackTrace,
-          fallback: 'Could not load cloud note. Showing local copy. ${AppErrorHandler.messageFor(error)}',
+          fallback:
+              'Could not load cloud note. Showing local copy. ${AppErrorHandler.messageFor(error)}',
         );
       }
       return;
@@ -110,7 +145,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       setState(() {
         _loading = false;
         _offline = showOffline;
-        _localDirty = local['_dirty'] == true || LocalNoteStorage.isLocalId(local['id']);
+        _localDirty =
+            local['_dirty'] == true || LocalNoteStorage.isLocalId(local['id']);
       });
     }
   }
@@ -130,7 +166,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   Future<void> _fetchCollaborators() async {
     if (_serverNoteId == null) return;
     try {
-      final response = await ApiService.get('/notes/$_serverNoteId/collaborators');
+      final response =
+          await ApiService.get('/notes/$_serverNoteId/collaborators');
       _collabs = response['data'] ?? [];
     } catch (error, stackTrace) {
       AppErrorHandler.report(error, stackTrace, source: 'Fetch collaborators');
@@ -182,10 +219,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           buffer.write('<ol>');
           inOl = true;
         }
-        buffer.write('<li>${escape(trimmed.replaceFirst(RegExp(r'^\d+[\.)]\s+'), ''))}</li>');
+        buffer.write(
+            '<li>${escape(trimmed.replaceFirst(RegExp(r'^\d+[\.)]\s+'), ''))}</li>');
       } else if (trimmed.startsWith('> ')) {
         closeLists();
-        buffer.write('<blockquote>${escape(trimmed.substring(2))}</blockquote>');
+        buffer
+            .write('<blockquote>${escape(trimmed.substring(2))}</blockquote>');
       } else {
         closeLists();
         buffer.write('<p>${escape(line)}</p>');
@@ -201,7 +240,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     return {
       ...?_note,
       'id': _activeNoteId,
-      'title': _titleC.text.trim().isEmpty ? 'Untitled Note' : _titleC.text.trim(),
+      'title':
+          _titleC.text.trim().isEmpty ? 'Untitled Note' : _titleC.text.trim(),
       'content': content,
       'plain_text': _contentC.text.trim(),
       'color': _color,
@@ -221,7 +261,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         _activeNoteId,
         _currentNoteData(),
         dirty: true,
-        syncAction: LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
+        syncAction:
+            LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
       );
     });
   }
@@ -247,7 +288,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           _activeNoteId,
           data,
           dirty: true,
-          syncAction: LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
+          syncAction:
+              LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
         );
         if (mounted) {
           setState(() {
@@ -267,7 +309,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         cloudNote = Map<String, dynamic>.from(response['data']);
         await LocalNoteStorage.replaceNoteId(_activeNoteId, cloudNote);
       } else {
-        final response = await ApiService.put('/notes/$_serverNoteId', body: body);
+        final response =
+            await ApiService.put('/notes/$_serverNoteId', body: body);
         cloudNote = Map<String, dynamic>.from(response['data']);
         await LocalNoteStorage.saveNote(_serverNoteId, cloudNote);
       }
@@ -299,7 +342,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         _activeNoteId,
         data,
         dirty: true,
-        syncAction: LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
+        syncAction:
+            LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
       );
       if (mounted) {
         setState(() {
@@ -308,7 +352,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         });
         if (!silent) {
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Saved locally. ${AppErrorHandler.messageFor(error)}'),
+            content:
+                Text('Saved locally. ${AppErrorHandler.messageFor(error)}'),
             backgroundColor: const Color(0xFFB45309),
           ));
         }
@@ -319,7 +364,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   Future<void> _setColor(String color) async {
-    setState(() => _color = color);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _color = color);
+    });
     _markDirty();
   }
 
@@ -356,10 +403,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
     setState(() => _aiLoading = true);
     try {
-      final response = await ApiService.post('/notes/$_serverNoteId/ai-summary');
+      final response =
+          await ApiService.post('/notes/$_serverNoteId/ai-summary');
       setState(() => _aiSummary = response['summary']);
     } catch (error, stackTrace) {
-      if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      if (mounted)
+        AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
     } finally {
       if (mounted) setState(() => _aiLoading = false);
     }
@@ -375,25 +424,30 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     final file = result.files.single;
     if (!await ApiService.hasToken()) {
       await _addLocalAttachment(file);
-      _message('Attached locally. Sign in to sync and share files.', const Color(0xFF047857));
+      _message('Attached locally. Sign in to sync and share files.',
+          const Color(0xFF047857));
       return;
     }
 
     if (_serverNoteId == null || _localDirty) await _save(silent: true);
     if (_serverNoteId == null) {
       await _addLocalAttachment(file);
-      _message('Attached locally. It will upload after cloud sync.', Colors.orange);
+      _message(
+          'Attached locally. It will upload after cloud sync.', Colors.orange);
       return;
     }
 
     try {
-      await ApiService.uploadFile('/files/upload', file.path!, noteId: _serverNoteId.toString());
+      await ApiService.uploadFile('/files/upload', file.path!,
+          noteId: _serverNoteId.toString());
       _message('File attached', const Color(0xFF047857));
       await _fetch();
     } catch (error, stackTrace) {
       AppErrorHandler.report(error, stackTrace, source: 'Attach file');
       await _addLocalAttachment(file);
-      _message('Saved locally. Cloud upload failed: ${AppErrorHandler.messageFor(error)}', Colors.orange);
+      _message(
+          'Saved locally. Cloud upload failed: ${AppErrorHandler.messageFor(error)}',
+          Colors.orange);
     }
   }
 
@@ -408,7 +462,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => PdfViewerScreen(title: item['original_name'] ?? 'PDF', filePath: path),
+            builder: (_) => PdfViewerScreen(
+                title: item['original_name'] ?? 'PDF', filePath: path),
           ),
         );
         return;
@@ -425,7 +480,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         await Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => PdfViewerScreen(title: item['original_name'] ?? 'PDF', url: url),
+            builder: (_) => PdfViewerScreen(
+                title: item['original_name'] ?? 'PDF', url: url),
           ),
         );
         return;
@@ -435,7 +491,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (error, stackTrace) {
-      if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace, fallback: 'Unable to open file. ${AppErrorHandler.messageFor(error)}');
+      if (mounted)
+        AppErrorHandler.show(error,
+            context: context,
+            stackTrace: stackTrace,
+            fallback:
+                'Unable to open file. ${AppErrorHandler.messageFor(error)}');
     }
   }
 
@@ -457,22 +518,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       _activeNoteId,
       _currentNoteData(),
       dirty: true,
-      syncAction: LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
+      syncAction:
+          LocalNoteStorage.isLocalId(_activeNoteId) ? 'create' : 'update',
     );
   }
 
   List<Map<String, dynamic>> _localAttachments() {
     return _files
-        .where((file) => file is Map && file['_local'] == true && file['path'] != null)
+        .where((file) =>
+            file is Map && file['_local'] == true && file['path'] != null)
         .map((file) => Map<String, dynamic>.from(file))
         .toList();
   }
 
-  Future<void> _uploadLocalAttachments(dynamic noteId, List<Map<String, dynamic>> files) async {
+  Future<void> _uploadLocalAttachments(
+      dynamic noteId, List<Map<String, dynamic>> files) async {
     for (final file in files) {
       final path = file['path']?.toString();
       if (path != null && path.isNotEmpty) {
-        await ApiService.uploadFile('/files/upload', path, noteId: noteId.toString());
+        await ApiService.uploadFile('/files/upload', path,
+            noteId: noteId.toString());
       }
     }
   }
@@ -490,7 +555,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
     if (lower.endsWith('.txt')) return 'text/plain';
     if (lower.endsWith('.doc')) return 'application/msword';
-    if (lower.endsWith('.docx')) return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    if (lower.endsWith('.docx'))
+      return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
     return 'application/octet-stream';
   }
 
@@ -513,7 +579,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       friends = results[1]['data'] ?? [];
       _collabs = results[2]['data'] ?? [];
     } catch (error, stackTrace) {
-      if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace, fallback: 'Sharing needs an internet connection. ${AppErrorHandler.messageFor(error)}');
+      if (mounted)
+        AppErrorHandler.show(error,
+            context: context,
+            stackTrace: stackTrace,
+            fallback:
+                'Sharing needs an internet connection. ${AppErrorHandler.messageFor(error)}');
       return;
     }
 
@@ -521,12 +592,17 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheet) {
-          final availableFriends = friends.where((friend) => !_collabs.any((c) => c['shared_with'] == friend['id'])).toList();
+          final availableFriends = friends
+              .where((friend) =>
+                  !_collabs.any((c) => c['shared_with'] == friend['id']))
+              .toList();
           return Padding(
-            padding: EdgeInsets.fromLTRB(20, 18, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
+            padding: EdgeInsets.fromLTRB(
+                20, 18, 20, MediaQuery.of(ctx).viewInsets.bottom + 20),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -534,8 +610,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 children: [
                   Row(
                     children: [
-                      const Expanded(child: Text('Share note', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800))),
-                      IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(Icons.close)),
+                      const Expanded(
+                          child: Text('Share note',
+                              style: TextStyle(
+                                  fontSize: 20, fontWeight: FontWeight.w800))),
+                      IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -551,15 +632,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                       children: [
                         Row(
                           children: [
-                            const Text('Share code', style: TextStyle(fontWeight: FontWeight.w800)),
+                            const Text('Share code',
+                                style: TextStyle(fontWeight: FontWeight.w800)),
                             const Spacer(),
                             TextButton.icon(
                               onPressed: () async {
                                 try {
-                                  final response = await ApiService.post('/notes/$_serverNoteId/regenerate-code');
-                                  setSheet(() => _shareCode = response['share_code']);
+                                  final response = await ApiService.post(
+                                      '/notes/$_serverNoteId/regenerate-code');
+                                  setSheet(() =>
+                                      _shareCode = response['share_code']);
                                 } catch (error, stackTrace) {
-                                  if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+                                  if (mounted)
+                                    AppErrorHandler.show(error,
+                                        context: context,
+                                        stackTrace: stackTrace);
                                 }
                               },
                               icon: const Icon(Icons.refresh, size: 16),
@@ -571,57 +658,75 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                           children: [
                             Expanded(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
+                                decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8)),
                                 child: Text(
                                   _shareCode ?? '--------',
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 5, fontFamily: 'monospace'),
+                                  style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 5,
+                                      fontFamily: 'monospace'),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 10),
                             IconButton.filled(
                               onPressed: () {
-                                Clipboard.setData(ClipboardData(text: _shareCode ?? ''));
-                                _message('Code copied', const Color(0xFF047857));
+                                Clipboard.setData(
+                                    ClipboardData(text: _shareCode ?? ''));
+                                _message(
+                                    'Code copied', const Color(0xFF047857));
                               },
                               icon: const Icon(Icons.copy),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text('Codes add the note as view-only. Give edit access from the friends list below.',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        Text(
+                            'Codes add the note as view-only. Give edit access from the friends list below.',
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade600)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Friends', style: TextStyle(fontWeight: FontWeight.w800)),
+                  const Text('Friends',
+                      style: TextStyle(fontWeight: FontWeight.w800)),
                   const SizedBox(height: 8),
                   if (availableFriends.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Text('No available friends to share with.', style: TextStyle(color: Colors.grey.shade500)),
+                      child: Text('No available friends to share with.',
+                          style: TextStyle(color: Colors.grey.shade500)),
                     )
                   else
                     ...availableFriends.map((friend) => ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(child: Text(_initial(friend['name']))),
-                          title: Text(friend['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
+                          leading: CircleAvatar(
+                              child: Text(_initial(friend['name']))),
+                          title: Text(friend['name'] ?? '',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
                           subtitle: Text('@${friend['username']}'),
                           trailing: Wrap(
                             spacing: 4,
                             children: [
                               TextButton(
                                 onPressed: () async {
-                                  await _shareWithFriend(friend, 'view', setSheet);
+                                  await _shareWithFriend(
+                                      friend, 'view', setSheet);
                                 },
                                 child: const Text('View'),
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  await _shareWithFriend(friend, 'edit', setSheet);
+                                  await _shareWithFriend(
+                                      friend, 'edit', setSheet);
                                 },
                                 child: const Text('Edit'),
                               ),
@@ -630,40 +735,58 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                         )),
                   const SizedBox(height: 14),
                   if (_collabs.isNotEmpty) ...[
-                    Text('Collaborators (${_collabs.length})', style: const TextStyle(fontWeight: FontWeight.w800)),
+                    Text('Collaborators (${_collabs.length})',
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
                     const SizedBox(height: 8),
                     ..._collabs.map((c) => ListTile(
                           contentPadding: EdgeInsets.zero,
-                          leading: CircleAvatar(child: Text(_initial(c['recipient']?['name']))),
-                          title: Text(c['recipient']?['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700)),
-                          subtitle: Text('@${c['recipient']?['username'] ?? ''}'),
+                          leading: CircleAvatar(
+                              child: Text(_initial(c['recipient']?['name']))),
+                          title: Text(c['recipient']?['name'] ?? '',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700)),
+                          subtitle:
+                              Text('@${c['recipient']?['username'] ?? ''}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               DropdownButton<String>(
-                                value: c['permission'] == 'edit' ? 'edit' : 'view',
+                                value:
+                                    c['permission'] == 'edit' ? 'edit' : 'view',
                                 underline: const SizedBox(),
                                 items: const [
-                                  DropdownMenuItem(value: 'view', child: Text('View')),
-                                  DropdownMenuItem(value: 'edit', child: Text('Edit')),
+                                  DropdownMenuItem(
+                                      value: 'view', child: Text('View')),
+                                  DropdownMenuItem(
+                                      value: 'edit', child: Text('Edit')),
                                 ],
                                 onChanged: (value) async {
                                   if (value == null) return;
                                   try {
-                                    await ApiService.put('/notes/$_serverNoteId/share/${c['shared_with']}', body: {'permission': value});
+                                    await ApiService.put(
+                                        '/notes/$_serverNoteId/share/${c['shared_with']}',
+                                        body: {'permission': value});
                                     setSheet(() => c['permission'] = value);
                                   } catch (error, stackTrace) {
-                                    if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+                                    if (mounted)
+                                      AppErrorHandler.show(error,
+                                          context: context,
+                                          stackTrace: stackTrace);
                                   }
                                 },
                               ),
                               IconButton(
                                 onPressed: () async {
                                   try {
-                                    await ApiService.delete('/notes/$_serverNoteId/share/${c['shared_with']}');
-                                    setSheet(() => _collabs.removeWhere((x) => x['shared_with'] == c['shared_with']));
+                                    await ApiService.delete(
+                                        '/notes/$_serverNoteId/share/${c['shared_with']}');
+                                    setSheet(() => _collabs.removeWhere((x) =>
+                                        x['shared_with'] == c['shared_with']));
                                   } catch (error, stackTrace) {
-                                    if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+                                    if (mounted)
+                                      AppErrorHandler.show(error,
+                                          context: context,
+                                          stackTrace: stackTrace);
                                   }
                                 },
                                 icon: const Icon(Icons.close, size: 18),
@@ -681,22 +804,26 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
   }
 
-  Future<void> _shareWithFriend(dynamic friend, String permission, StateSetter setSheet) async {
+  Future<void> _shareWithFriend(
+      dynamic friend, String permission, StateSetter setSheet) async {
     try {
-      final response = await ApiService.post('/notes/$_serverNoteId/share', body: {
+      final response =
+          await ApiService.post('/notes/$_serverNoteId/share', body: {
         'user_id': friend['id'],
         'permission': permission,
       });
       setSheet(() => _collabs.add(response['data']));
       _message('Shared with @${friend['username']}', const Color(0xFF047857));
     } catch (error, stackTrace) {
-      if (mounted) AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      if (mounted)
+        AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
     }
   }
 
   void _message(String text, Color color) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text), backgroundColor: color));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(text), backgroundColor: color));
   }
 
   String _initial(dynamic value) {
@@ -717,20 +844,38 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         title: Text(_localDirty ? 'Unsynced changes' : 'Note'),
         actions: [
           if (_canEdit)
-            IconButton(icon: const Icon(Icons.push_pin_outlined), onPressed: _togglePin, tooltip: 'Pin'),
+            IconButton(
+                icon: const Icon(Icons.push_pin_outlined),
+                onPressed: _togglePin,
+                tooltip: 'Pin'),
           if (_canEdit)
-            IconButton(icon: const Icon(Icons.attach_file), onPressed: _attachFile, tooltip: 'Attach file'),
+            IconButton(
+                icon: const Icon(Icons.attach_file),
+                onPressed: _attachFile,
+                tooltip: 'Attach file'),
           IconButton(
             icon: _aiLoading
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.auto_awesome_outlined),
             onPressed: _aiLoading ? null : _aiSummarize,
             tooltip: 'AI summary',
           ),
-          if (_isOwner) IconButton(icon: const Icon(Icons.ios_share), onPressed: _showShareSheet, tooltip: 'Share'),
+          if (_isOwner)
+            IconButton(
+                icon: const Icon(Icons.ios_share),
+                onPressed: _showShareSheet,
+                tooltip: 'Share'),
           if (_canEdit)
             IconButton(
-              icon: _saving ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.check),
+              icon: _saving
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.check),
               onPressed: _saving ? null : () => _save(),
               tooltip: 'Save',
             ),
@@ -745,33 +890,61 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _statusChip(_perm == 'owner' ? 'Owner' : _perm == 'edit' ? 'Can edit' : 'View only', Icons.lock_open),
-                if (_offline) _statusChip('Offline', Icons.cloud_off, warning: true),
-                if (_localDirty) _statusChip('Saved locally', Icons.cloud_upload_outlined, warning: true),
+                _statusChip(
+                    _perm == 'owner'
+                        ? 'Owner'
+                        : _perm == 'edit'
+                            ? 'Can edit'
+                            : 'View only',
+                    Icons.lock_open),
+                if (_offline)
+                  _statusChip('Offline', Icons.cloud_off, warning: true),
+                if (_localDirty)
+                  _statusChip('Saved locally', Icons.cloud_upload_outlined,
+                      warning: true),
               ],
             ),
             const SizedBox(height: 14),
             if (_canEdit)
               Row(
                 children: [
-                  ..._palette.map((color) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () => _setColor(color),
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: _colorValue(color),
-                              shape: BoxShape.circle,
-                              border: Border.all(color: _color == color ? const Color(0xFF111827) : const Color(0xFFE5E7EB), width: _color == color ? 2 : 1),
-                            ),
-                          ),
-                        ),
-                      )),
-                  const Spacer(),
-                  Icon(_note?['is_pinned'] == true ? Icons.push_pin : Icons.push_pin_outlined, size: 18, color: const Color(0xFF92400E)),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _palette
+                            .map((color) => Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(16),
+                                    onTap: () => _setColor(color),
+                                    child: Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        color: _colorValue(color),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: _color == color
+                                              ? const Color(0xFF111827)
+                                              : const Color(0xFFE5E7EB),
+                                          width: _color == color ? 2 : 1,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _note?['is_pinned'] == true
+                        ? Icons.push_pin
+                        : Icons.push_pin_outlined,
+                    size: 18,
+                    color: const Color(0xFF92400E),
+                  ),
                 ],
               ),
             const SizedBox(height: 12),
@@ -779,7 +952,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               controller: _titleC,
               readOnly: !_canEdit,
               textCapitalization: TextCapitalization.sentences,
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w900, height: 1.1),
+              style: const TextStyle(
+                  fontSize: 30, fontWeight: FontWeight.w900, height: 1.1),
               decoration: const InputDecoration(
                 hintText: 'Title',
                 border: InputBorder.none,
@@ -792,7 +966,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               onChanged: (_) => _markDirty(),
             ),
             const SizedBox(height: 10),
-            if (_aiSummary != null && _aiSummary!.trim().isNotEmpty) _summaryCard(),
+            if (_aiSummary != null && _aiSummary!.trim().isNotEmpty)
+              _summaryCard(),
             if (_files.isNotEmpty) _filesCard(),
             if (_canEdit) _writingToolbar(),
             TextField(
@@ -801,7 +976,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               readOnly: !_canEdit,
               keyboardType: TextInputType.multiline,
               textCapitalization: TextCapitalization.sentences,
-              style: const TextStyle(fontSize: 16, height: 1.75, color: Color(0xFF111827)),
+              style: const TextStyle(
+                  fontSize: 16, height: 1.75, color: Color(0xFF111827)),
               decoration: const InputDecoration(
                 hintText: 'Start writing',
                 border: InputBorder.none,
@@ -832,9 +1008,12 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       child: Row(
         children: [
           _toolButton(Icons.title, 'Heading', () => _insertPrefix('# ')),
-          _toolButton(Icons.format_list_bulleted, 'Bullets', () => _insertPrefix('- ')),
-          _toolButton(Icons.format_list_numbered, 'Numbers', () => _insertPrefix('1. ')),
-          _toolButton(Icons.check_box_outlined, 'Task', () => _insertPrefix('- [ ] ')),
+          _toolButton(
+              Icons.format_list_bulleted, 'Bullets', () => _insertPrefix('- ')),
+          _toolButton(Icons.format_list_numbered, 'Numbers',
+              () => _insertPrefix('1. ')),
+          _toolButton(
+              Icons.check_box_outlined, 'Task', () => _insertPrefix('- [ ] ')),
           _toolButton(Icons.format_quote, 'Quote', () => _insertPrefix('> ')),
         ],
       ),
@@ -854,16 +1033,27 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: warning ? const Color(0xFFFFFBEB) : Colors.white.withOpacity(0.7),
+        color:
+            warning ? const Color(0xFFFFFBEB) : Colors.white.withOpacity(0.7),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: warning ? const Color(0xFFFDE68A) : const Color(0xFFE5E7EB)),
+        border: Border.all(
+            color: warning ? const Color(0xFFFDE68A) : const Color(0xFFE5E7EB)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: warning ? const Color(0xFFB45309) : const Color(0xFF374151)),
+          Icon(icon,
+              size: 14,
+              color:
+                  warning ? const Color(0xFFB45309) : const Color(0xFF374151)),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: warning ? const Color(0xFF92400E) : const Color(0xFF374151))),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: warning
+                      ? const Color(0xFF92400E)
+                      : const Color(0xFF374151))),
         ],
       ),
     );
@@ -885,10 +1075,16 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           const Row(children: [
             Icon(Icons.auto_awesome, size: 15, color: Color(0xFFB45309)),
             SizedBox(width: 6),
-            Text('AI summary', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF92400E))),
+            Text('AI summary',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF92400E))),
           ]),
           const SizedBox(height: 6),
-          Text(_aiSummary!, style: const TextStyle(fontSize: 13, color: Color(0xFF78350F), height: 1.45)),
+          Text(_aiSummary!,
+              style: const TextStyle(
+                  fontSize: 13, color: Color(0xFF78350F), height: 1.45)),
         ],
       ),
     );
@@ -907,15 +1103,23 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Files (${_files.length})', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+          Text('Files (${_files.length})',
+              style:
+                  const TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           ..._files.map((file) => ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(file['mime_type']?.toString().contains('pdf') == true ? Icons.picture_as_pdf : Icons.insert_drive_file),
-                title: Text(file['original_name'] ?? '', maxLines: 1, overflow: TextOverflow.ellipsis),
+                leading: Icon(
+                    file['mime_type']?.toString().contains('pdf') == true
+                        ? Icons.picture_as_pdf
+                        : Icons.insert_drive_file),
+                title: Text(file['original_name'] ?? '',
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
                 trailing: IconButton(
-                  icon: Icon(_isPdf(Map<String, dynamic>.from(file)) ? Icons.visibility_outlined : Icons.open_in_new),
+                  icon: Icon(_isPdf(Map<String, dynamic>.from(file))
+                      ? Icons.visibility_outlined
+                      : Icons.open_in_new),
                   onPressed: () => _openAttachment(file),
                 ),
               )),
