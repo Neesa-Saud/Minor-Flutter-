@@ -5,6 +5,7 @@ import '../../services/api_service.dart';
 import '../../services/error_handler.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
+import '../../services/pookie_mode.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -149,6 +150,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }, child: const Text('Change Password'))),
         ]))),
         const SizedBox(height: 24),
+          // Pookie Mode toggle
+        Consumer<PookieMode>(
+          builder: (context, pookie, _) => Card(
+            child: ListTile(
+              leading: Icon(
+                Icons.favorite,
+                color: pookie.enabled ? Colors.pink : Colors.grey,
+              ),
+              title: const Text('Pookie Mode',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: Text(pookie.enabled
+                  ? '🌸 Stay cute, study hard! ✨'
+                  : 'Activate for a cute pink theme'),
+              trailing: Switch(
+                value: pookie.enabled,
+                activeColor: Colors.pink,
+                onChanged: (_) async {
+                  await pookie.toggle();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(pookie.enabled
+                          ? '🎀 Pookie Mode Activated! Stay cute, study hard! ✨🧸'
+                          : '🧸 Pookie Mode Deactivated'),
+                      backgroundColor: Colors.pink,
+                      duration: const Duration(seconds: 3),
+                    ));
+                  }
+                },
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
 
         // Logout
         SizedBox(width: double.infinity, child: OutlinedButton.icon(
