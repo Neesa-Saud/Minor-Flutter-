@@ -39,12 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
       await context
           .read<AuthService>()
           .login(login: _loginCtrl.text, password: _passCtrl.text);
-      if (mounted)
+      if (mounted) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (_) => const DashboardScreen()));
+      }
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -76,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         .headlineSmall
                         ?.copyWith(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
-                Text('Sign in to Notexa',
+                Text('Sign in to NotExA',
                     style: TextStyle(color: Colors.grey.shade500)),
                 const SizedBox(height: 32),
                 TextField(

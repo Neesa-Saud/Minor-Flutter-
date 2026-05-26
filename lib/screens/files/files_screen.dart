@@ -27,8 +27,9 @@ class _FilesScreenState extends State<FilesScreen> {
       final r = await ApiService.get('/files');
       if (mounted) setState(() => _files = r['data']?['data'] ?? []);
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -44,8 +45,9 @@ class _FilesScreenState extends State<FilesScreen> {
           content: Text('Uploaded!'), backgroundColor: Colors.green));
       _fetch();
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     } finally {
       if (mounted) setState(() => _uploading = false);
     }
@@ -82,8 +84,9 @@ class _FilesScreenState extends State<FilesScreen> {
         await launchUrl(Uri.parse(url));
       }
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     }
   }
 
@@ -161,14 +164,16 @@ class _FilesScreenState extends State<FilesScreen> {
                                                 '/files/${f['id']}/download');
                                             final opened = await launchUrl(
                                                 Uri.parse(r['download_url']));
-                                            if (!opened)
+                                            if (!opened) {
                                               throw Exception(
                                                   'Could not open the download link.');
+                                            }
                                           } catch (error, stackTrace) {
-                                            if (mounted)
+                                            if (mounted) {
                                               AppErrorHandler.show(error,
                                                   context: context,
                                                   stackTrace: stackTrace);
+                                            }
                                           }
                                         }),
                                     IconButton(
@@ -180,10 +185,11 @@ class _FilesScreenState extends State<FilesScreen> {
                                                 '/files/${f['id']}');
                                             _fetch();
                                           } catch (error, stackTrace) {
-                                            if (mounted)
+                                            if (mounted) {
                                               AppErrorHandler.show(error,
                                                   context: context,
                                                   stackTrace: stackTrace);
+                                            }
                                           }
                                         }),
                                   ]),

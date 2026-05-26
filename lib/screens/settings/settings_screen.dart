@@ -53,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: const Icon(Icons.cloud_upload_outlined, color: Color(0xFF4F46E5), size: 28),
                   ),
                   const SizedBox(height: 18),
-                  const Text('Use Notexa locally', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
+                  const Text('Use NotExA locally', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900)),
                   const SizedBox(height: 8),
                   Text(
                     'You can create notes and attach local PDFs without an account. Register or sign in when you want cloud backup, sharing codes, friends, and shared PDF files.',
@@ -165,7 +165,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   : 'Activate for a cute pink theme'),
               trailing: Switch(
                 value: pookie.enabled,
-                activeColor: Colors.pink,
+                activeThumbColor: Colors.pink,
                 onChanged: (_) async {
                   await pookie.toggle();
                   if (context.mounted) {

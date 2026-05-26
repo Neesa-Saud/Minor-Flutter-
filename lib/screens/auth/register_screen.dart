@@ -53,12 +53,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             password: _pass.text,
             passwordConfirmation: _confirm.text,
           );
-      if (mounted)
+      if (mounted) {
         Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (_) => const DashboardScreen()));
+      }
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

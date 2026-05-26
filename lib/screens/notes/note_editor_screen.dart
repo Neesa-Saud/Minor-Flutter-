@@ -407,8 +407,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           await ApiService.post('/notes/$_serverNoteId/ai-summary');
       setState(() => _aiSummary = response['summary']);
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     } finally {
       if (mounted) setState(() => _aiLoading = false);
     }
@@ -491,12 +492,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error,
             context: context,
             stackTrace: stackTrace,
             fallback:
                 'Unable to open file. ${AppErrorHandler.messageFor(error)}');
+      }
     }
   }
 
@@ -555,8 +557,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
     if (lower.endsWith('.txt')) return 'text/plain';
     if (lower.endsWith('.doc')) return 'application/msword';
-    if (lower.endsWith('.docx'))
+    if (lower.endsWith('.docx')) {
       return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    }
     return 'application/octet-stream';
   }
 
@@ -579,12 +582,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       friends = results[1]['data'] ?? [];
       _collabs = results[2]['data'] ?? [];
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error,
             context: context,
             stackTrace: stackTrace,
             fallback:
                 'Sharing needs an internet connection. ${AppErrorHandler.messageFor(error)}');
+      }
       return;
     }
 
@@ -643,10 +647,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                   setSheet(() =>
                                       _shareCode = response['share_code']);
                                 } catch (error, stackTrace) {
-                                  if (mounted)
+                                  if (mounted) {
                                     AppErrorHandler.show(error,
                                         context: context,
                                         stackTrace: stackTrace);
+                                  }
                                 }
                               },
                               icon: const Icon(Icons.refresh, size: 16),
@@ -768,10 +773,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                         body: {'permission': value});
                                     setSheet(() => c['permission'] = value);
                                   } catch (error, stackTrace) {
-                                    if (mounted)
+                                    if (mounted) {
                                       AppErrorHandler.show(error,
                                           context: context,
                                           stackTrace: stackTrace);
+                                    }
                                   }
                                 },
                               ),
@@ -783,10 +789,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                                     setSheet(() => _collabs.removeWhere((x) =>
                                         x['shared_with'] == c['shared_with']));
                                   } catch (error, stackTrace) {
-                                    if (mounted)
+                                    if (mounted) {
                                       AppErrorHandler.show(error,
                                           context: context,
                                           stackTrace: stackTrace);
+                                    }
                                   }
                                 },
                                 icon: const Icon(Icons.close, size: 18),
@@ -815,8 +822,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       setSheet(() => _collabs.add(response['data']));
       _message('Shared with @${friend['username']}', const Color(0xFF047857));
     } catch (error, stackTrace) {
-      if (mounted)
+      if (mounted) {
         AppErrorHandler.show(error, context: context, stackTrace: stackTrace);
+      }
     }
   }
 

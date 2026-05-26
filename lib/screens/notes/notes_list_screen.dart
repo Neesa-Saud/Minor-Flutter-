@@ -462,7 +462,7 @@ class _NotesListScreenState extends State<NotesListScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Notexa',
+            const Text('NotExA',
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22)),
             Text(
               _offline && !context.watch<AuthService>().isAuthenticated
